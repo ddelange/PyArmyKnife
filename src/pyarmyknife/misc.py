@@ -1,11 +1,19 @@
-from itertools import islice
+from __future__ import print_function
+from __future__ import division
+from __future__ import unicode_literals
+from __future__ import absolute_import
+from builtins import int
+from builtins import input
+from builtins import range
+from builtins import object
+from future import standard_library
+
+standard_library.install_aliases()
 
 
 # Mike C Fletcher's flatten http://www.bit.ly/2ULLMnm
 def flatten(obj, ltypes=(list, tuple)):
-    """
-    Flatten a nested variable, by default only list/tuple combinations.
-    """
+    """Flatten a nested variable, by default only list/tuple combinations."""
     ltype = type(obj)
     obj = list(obj)
     i = 0
@@ -18,25 +26,34 @@ def flatten(obj, ltypes=(list, tuple)):
             else:
                 obj[i:i + 1] = obj[i]
         i += 1
-    return ltype(l)
+    return ltype(obj)
 
 
 def split_batch(data, size=100):
-    """
-    Yield iterable generator object of splitted lists or dicts.
-    """
+    """Yield iterable generator object of splitted lists or dicts."""
+    from itertools import islice
     it = iter(data)
-    for i in range(0, len(data), size):
-        if isinstance(data, dict):
-            yield {k: data[k] for k in islice(it, size)}
-        elif isinstance(data, list):
-            yield list(islice(it, size))
+    if isinstance(data, dict):
+        yield from (
+            {
+                k: data[k] for k in islice(it, size)
+            } for _ in range(0, len(data), size)
+        )
+    else:
+        try:
+            import boltons.iterutils
+            yield from boltons.iterutils.chunked_iter(data, size)
+        except ImportError:
+            yield from (
+                type(data)(islice(it, size)) for _ in range(0, len(data), size)
+            )
 
 
 def get_current_function(depth=0):
     """
-    Gets the function object of the current function (depth=0)
-    or the function above that (depth=1) et cetera
+    Get the function object of the current function (depth=0).
+
+    Or the function above that (depth=1) et cetera
     """
     from inspect import currentframe, getframeinfo
     caller = currentframe()
@@ -49,57 +66,62 @@ def get_current_function(depth=0):
         return f'{e}: unknown function'
 
 
-def printvars(depth=0, sig=5, fillers=25):
+def local_vars(print_vars=True, depth=0, fillers=25):
     """
-    Prints -in order of declaration- all local variables {with (sig) significant figures}
-    in the current function (depth=0) or the function above that (depth=1) et cetera
-    fills up to (fillers) characters with periods '.'
+    Print -in order of declaration- all local variables.
+
+    In the current function (depth=0) or the function above that (depth=1) et cetera
+
+    Fill up to (fillers) characters with periods '.'
     """
     from inspect import currentframe, getouterframes
     fct = get_current_function(depth+1)
     locs = getouterframes(currentframe())[depth+1][0].f_locals
+    variables = []
     for var in fct.__code__.co_varnames:
-        try:
-            print('{0:.<{3}}{1:.{2}g}'.format(var, locs[var], sig, fillers if len(var) < fillers else len(var)+4))
-        except:
-            pass
+        var_string = '{0:.<{2}}{1}'.format(var, locs[var], fillers if len(var) < fillers else len(var)+4)
+        if print_vars:
+            print(var_string)
+        variables.append((var, locs[var]))
+    return variables
 
 
-def liup(iteration=1):
-    """
-    puts cursor `iteration` lines higher at the beginning of the line, then clears that line
-    """
+def pp(indent=1, width=80, depth=None, stream=None, compact=False):
+    import pprint
+    return pprint.PrettyPrinter(indent=indent, width=width, depth=depth, stream=stream, compact=compact).pprint
+
+
+def set_trace():
+    import ipdb
+    ipdb.set_trace()
+
+
+def line_up(iteration=1):
+    """Puts cursor `iteration` lines higher at the beginning of the line, then clears that line."""
+    from sys import stdout
     stdout.write('\x1b[{}F'.format(iteration))
     stdout.write('\x1b[2K')
 
 
-def wriup(writeline='test3', iteration=1):
-    """
-    liup, then fills that line, and put the cursor down to original position
-    """
-    liup(iteration)
+def write_up(writeline='test3', iteration=1):
+    """Run liup, then fills that line, and put the cursor down to original position."""
+    from sys import stdout
+    line_up(iteration)
     stdout.write(writeline)
     stdout.write('\x1b[{}E'.format(iteration))
     stdout.flush()
 
 
 def bold(string):
-    """
-    returns a ANSI bold string
-    """
-    if name is 'nt':
-        return string
-    else:
-        return '\033[1m{}\033[0;0m'.format(string)
+    """Return an ANSI bold string."""
+    from os import name
+    return string if name == 'nt' else '\033[1m{}\033[0;0m'.format(string)
 
 
 def integer_input(question=''):
-    """
-    User input of integer
-    """
-    if not question is '' and not question.endswith(' '):
+    """User input of integer."""
+    if question and not question.endswith(' '):
         question += ' '
-
     while True:
         try:
             return int(input('{}Enter an integer: '.format(question)))
@@ -107,24 +129,42 @@ def integer_input(question=''):
             print('Not an integer! Please try again...')
 
 
-class cst:
-    """
-    Constants
-    """
+# Airflow datetime:
+
+
+def myconverter(o):
+    """Use json.dumps(data, default=myconverter)."""
+    if isinstance(o, datetime.datetime):
+        return o.__str__()
+
+
+def parse_datetime(datetime_string, strf='%Y-%m-%d %H:%M:%S%z'):
+    if '.' in datetime_string:
+        strf = '%Y-%m-%d %H:%M:%S.%f%z'
+    return datetime.datetime.strptime(
+        datetime_string.replace(':00', '00'),  # %z timezone in format +0000
+        strf,
+    )
+
+
+
+class cst(object):
+    """SI constants."""
+    Pi = 3.141592653589793238462643383279502884  # https://github.com/numpy/numpy/blob/464f79eb1d05bf938d16b49da1c39a4e02506fa3/numpy/core/include/numpy/npy_math.h#L79
     Grav = 6.67384e-11                  # m^3 kg^-1 s^-2
     Planck = 6.626070040e-34            # m^2 kg s^-1         OR    J s
     Boltz = 1.38064852e-23              # m^2 kg s^-2 K^-1    OR    J K^-1
     Stef_Boltz = 5.670367e-8            # W m^-2 K^-4
     c = 2.99792458e8                    # m s^-1
-    # c = sqrt(1/(ep0*mu0))             # m s^-1
-    mu0 = 4 * pi * 1e-7                 # H m^-1   OR    T m A^-1    OR    Wb A^-1 m^-1 OR    V s A^-1 m^-1
+    # c = (1/(ep0*mu0))**0.5            # m s^-1
+    mu0 = 4 * Pi * 1e-7                 # H m^-1   OR    T m A^-1    OR    Wb A^-1 m^-1 OR    V s A^-1 m^-1
     ep0 = 1 / (mu0 * c**2)              # F m^-1   OR    s^4 A^2 m^-2 kg^-1 m^-1
     e_mass = 9.10938215e-31             # kg
     n_mass = 1.674927471e-27            # kg
     p_mass = 1.672621777e-27            # kg
     eV = 1.602176565e-19                # J ev^-1  OR    C    OR    A s
-    toarcsec = (60**2 * 180) / pi       # arcsec rad^-1
-    torad = pi / (60**2 * 180)          # rad arcsec^-1
+    toarcsec = (60**2 * 180) / Pi       # arcsec rad^-1
+    torad = Pi / (60**2 * 180)          # rad arcsec^-1
 
     # Distances
     AU = 1.495978707e11                 # m
@@ -145,24 +185,24 @@ class cst:
 cst = cst()
 
 
-class formulae:
+class formulae(object):
     # Newton's theory of gravitation, standard value for human on earth
     def f_newton(self, r=cst.REarth, m1=cst.mEarth, m2=80):
         return cst.Grav * m1 * m2 / r**2       # N
 
     # Escape velocity, standard value for earth
     def escape_velocity(self, Height=cst.REarth, Mass=cst.mEarth):
-        return sqrt(2 * cst.Grav * float(Mass) / float(Height))      # m s^-1
+        return (2 * cst.Grav * float(Mass) / float(Height))**0.5      # m s^-1
 
     # Solving energy conservation with two heights and two velocities, 1 unknown
     # V or H can be unknown by entering -1, H or V respectively will then be returned
     def energy_conservation(self, Velocity=0, Height=0, velocity=0, height=0, Mass=0):
-        if 0 in [Velocity, Height, velocity, height, Mass] or (Velocity is -1 and Height is -1):
+        if 0 in [Velocity, Height, velocity, height, Mass] or (Velocity == -1 and Height == -1):
             print('Not physical.')
             return -1
-        elif Velocity is -1:
-            return sqrt(velocity**2 + 2 * cst.Grav * Mass / Height - 2 * cst.Grav * Mass / height)
-        elif Height is -1:
+        elif Velocity == -1:
+            return (velocity**2 + 2 * cst.Grav * Mass / Height - 2 * cst.Grav * Mass / height)**0.5
+        elif Height == -1:
             return cst.Grav * Mass / ((velocity**2) / 2 - cst.Grav * Mass / height + (Velocity**2) / 2)
         else:
             return -1

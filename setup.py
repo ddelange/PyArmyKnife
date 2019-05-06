@@ -1,7 +1,14 @@
-import re
+from __future__ import division
+from __future__ import unicode_literals
+from __future__ import print_function
+from __future__ import absolute_import
+from builtins import filter
+from future import standard_library
 from pathlib import Path
+import re
 
 from setuptools import find_packages, setup
+standard_library.install_aliases()
 
 here = Path(__file__).parent
 
@@ -16,18 +23,21 @@ try:
 except IndexError:
     raise RuntimeError('Unable to determine version.')
 
-requirements = here / 'requirements' / 'prod.txt'
 
-try:
-    with requirements.open(mode='rt', encoding='utf-8') as fp:
-        install_requires = (
-            line.split('#')[0].strip()
-            for line in fp
-            if not line.startswith('git+')
-        )
-        install_requires = list(filter(None, install_requires))
-except IndexError:
-    raise RuntimeError('requirements/prod.txt is broken')
+def read_requirements(path):
+    try:
+        with path.open(mode='rt', encoding='utf-8') as fp:
+            _install_requires = (line.split('#')[0].strip() for line in fp)
+            return list(filter(None, _install_requires))
+    except (IOError, IndexError):
+        raise RuntimeError(f'{path} is broken')
+
+
+requirements = here / 'requirements' / 'prod.txt'
+install_requires = read_requirements(requirements)
+extras_require = {
+    'sklearn': ['scikit-learn']
+}
 
 setup(
     name='pyarmyknife',
@@ -41,5 +51,7 @@ setup(
     },
     include_package_data=True,
     install_requires=install_requires,
+    extras_require=extras_require,
     python_requires='>=3.3.0',
 )
+

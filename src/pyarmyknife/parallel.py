@@ -1,29 +1,36 @@
-import pkg_resources
+from __future__ import unicode_literals
+from __future__ import print_function
+from __future__ import division
+from __future__ import absolute_import
+from future import standard_library
+
+standard_library.install_aliases()
 
 
-# PEP0440 compatible formatted version, see:
-# https://www.python.org/dev/peps/pep-0440/
-#
-# Generic release markers:
-#   X.Y
-#   X.Y.Z   # For bugfix releases
-#
-# Admissible pre-release markers:
-#   X.YaN   # Alpha release
-#   X.YbN   # Beta release
-#   X.YrcN  # Release Candidate
-#   X.Y     # Final release
-#
-# Dev branch marker is: 'X.Y.dev' or 'X.Y.devN' where N is an integer.
-# 'X.Y.dev0' is the canonical version of 'X.Y.dev'
-#
-__author__ = 'D. de Lange'
-__version__ = '0.0.1'
-
-try:
-    pkg_version = pkg_resources.get_distribution('pyarmyknife').version
-except pkg_resources.DistributionNotFound:
-    raise RuntimeError('Install pyarmyknife, eg "pip install -e ."')
-
-if pkg_version != __version__:
-    raise RuntimeError('Reinstall pyarmyknife, eg "pip install -e ."')
+# https://towardsdatascience.com/pandaral-lel-a-simple-and-efficient-tool-to-parallelize-your-pandas-operations-on-all-your-cpus-bb5ff2a409ae
+def parallel_function(
+    function,
+    input_iterable,
+    n_workers=-1,
+    progressbar=True,
+    **kwargs,
+):
+    """Apply function to each element of input_iterable."""
+    from functools import partial
+    from multiprocessing import cpu_count
+    from pypeln import process as pr
+    from tqdm import tqdm
+    n_cores = cpu_count()
+    n_workers = n_cores if n_workers == -1 else max(min(n_workers, n_cores), 1)
+    stage = pr.map(
+        partial(
+            function,
+            **kwargs,
+        ),
+        input_iterable,
+        workers=n_workers,
+    )
+    if progressbar:
+        return [x for x in tqdm(stage, total=len(input_iterable))]
+    else:
+        return [x for x in stage]

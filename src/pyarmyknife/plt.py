@@ -1,6 +1,14 @@
-from pyarmyknife.file import openfile
+from __future__ import print_function
+from __future__ import unicode_literals
+from __future__ import division
+from __future__ import absolute_import
+from builtins import int
+from builtins import str
+from future import standard_library
 
-# String for np.s avefig
+standard_library.install_aliases()
+
+# String for np.savefig
 _figureformat = 'pdf'
 _figuredpi = 400
 
@@ -16,9 +24,7 @@ def set_figure_dpi(new_dpi):
 
 
 def hide_ticklines(ax=None, which='both', idx=[0, -1]):
-    """
-    hides inside and outside ticks for indices corresponding to ticklabels
-    """
+    """Hide inside and outside ticks for indices corresponding to ticklabels."""
     from matplotlib.pyplot import gca
     from numpy import append
     ax = gca() if ax is None else ax
@@ -35,7 +41,8 @@ def hide_ticklines(ax=None, which='both', idx=[0, -1]):
 
 def plt_setup(packages=[], preamble=[], tex=True, bold=None):
     """
-    Sets up LaTex rendering with custom preamble
+    Set up LaTex rendering with custom preamble.
+
     Bold text/maths rendering
     Tick formatting, font sizes, gridlines
     """
@@ -76,9 +83,7 @@ def plt_setup(packages=[], preamble=[], tex=True, bold=None):
 
 
 def cbar_setup(img=None, fig=None, ax=None, label='', tick_length=2.5, tick_width=0.5):
-    """
-    returns a cbar with nice ticks and a label, based on colorbar of img
-    """
+    """Return a cbar with nice ticks and a label, based on colorbar of img."""
     from matplotlib.pyplot import gca, gcf
     from matplotlib.ticker import MaxNLocator
     fig1 = gcf() if fig is None else fig
@@ -92,10 +97,9 @@ def cbar_setup(img=None, fig=None, ax=None, label='', tick_length=2.5, tick_widt
     return cbar
 
 
-def savefigure(figname, printformat=None, dpi=None, open=False, setup=True, clear=True, fig=None, bbox_inches='tight', pad_inches=0.1):
-    """
-    saves (and opens) a file with a name in the same directory as this python file
-    """
+def save_figure(figname, printformat=None, dpi=None, open=False, setup=True, clear=True, fig=None, bbox_inches='tight', pad_inches=0.1):
+    """Save (and opens) a file with a name in the same directory as this python file."""
+    import fileio.openfile
     from matplotlib.pyplot import savefig, clf, close, draw, figure, gcf
     printformat = _figureformat if printformat is None else printformat
     dpi = _figuredpi if dpi is None else dpi
@@ -104,7 +108,7 @@ def savefigure(figname, printformat=None, dpi=None, open=False, setup=True, clea
         str(figname), str(printformat), int(dpi) < 5000, bool(open)
         if figname.endswith(printformat):
             figname = figname[:-(len(printformat) + 1)]
-    except:
+    except Exception:
         print('Wrong input for savefigure function.')
         return -1
     if path.exists(path.dirname(figname + '.' + printformat)):

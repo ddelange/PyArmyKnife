@@ -1,12 +1,21 @@
+from __future__ import unicode_literals
+from __future__ import print_function
+from __future__ import division
+from __future__ import absolute_import
+from builtins import open
+from future import standard_library
+
 import smtplib
 import tldextract
 from email.mime.text import MIMEText
+
+standard_library.install_aliases()
 
 
 def send_email(
     sender,
     pwd,
-    recipients=[pyarmyknife.author_email],
+    recipients,
     subject='Email from Python',
     body='',
     smtp='smtp.gmail.com:465',
@@ -26,11 +35,18 @@ def send_email(
     return failures
 
 
-def extract_domain(domain):
-    domain = domain.replace('\xa0', ' ').strip(' ')
-    return tldextract.extract(domain).fqdn.lower()
+def extract_domain(url, with_subdomain=False):
+    """Extract domain from url, needs a proper domain/suffix.
 
-
-def extract_registered_domain(domain):
-    domain = domain.replace('\xa0', ' ').strip(' ')
-    return tldextract.extract(domain).registered_domain.lower()
+    with_subdomain=True
+        Return a Fully Qualified Domain Name with suffix.
+    with_subdomain=False
+        Return only the registered domain with suffix.
+    """
+    assert isinstance(url, str) and url, f'Input "{url}" is not accepted'
+    url = url.replace('\xa0', ' ').strip(' \n')
+    if with_subdomain:
+        fqdn = tldextract.extract(url).fqdn.lower()
+        return fqdn.replace('www.', '', 1) if fqdn.startswith('www.') else fqdn
+    else:
+        return tldextract.extract(url).registered_domain.lower()
