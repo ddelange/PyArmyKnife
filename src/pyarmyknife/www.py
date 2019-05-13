@@ -47,6 +47,6 @@ def extract_domain(url, with_subdomain=False):
     url = url.replace('\xa0', ' ').strip(' \n')
     if with_subdomain:
         fqdn = tldextract.extract(url).fqdn.lower()
-        return fqdn.replace('www.', '', 1) if fqdn.startswith('www.') else fqdn
+        return fqdn[4:] if fqdn.startswith('www.') else fqdn
     else:
         return tldextract.extract(url).registered_domain.lower()
