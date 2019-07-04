@@ -1,1 +1,3 @@
+future
 tldextract
+aiobotocore[awscli,boto3]
