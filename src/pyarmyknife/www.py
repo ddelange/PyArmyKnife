@@ -214,12 +214,17 @@ class S3io():
             date_sort=date_sort,
             reverse=True,
         )
+        prefix_is_folder = keys[0].replace(prefix, '', 1).startswith('/')
+        if prefix_is_folder:
+            prefix += '/'
+
         folders = []
         for key in keys:
-            split = os.path.split(key[len(prefix):].rstrip('/'))[:-1]
-            if split[0].strip('/'):
-                split = split if recursive else [split[0]]
-                subfolder = prefix + os.path.join(*split)
+            # remove prefix and filename from key
+            components = key.replace(prefix, '', 1).split('/')[:-1]
+            if components:
+                components = components if recursive else [components[0]]
+                subfolder = prefix + '/'.join(components)
                 folders.append(subfolder) if subfolder not in folders else None
         return folders if reverse else folders[::-1]
 
