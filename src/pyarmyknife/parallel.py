@@ -22,15 +22,21 @@ def parallel_function(
     from tqdm import tqdm
     n_cores = cpu_count()
     n_workers = n_cores if n_workers == -1 else max(min(n_workers, n_cores), 1)
+
+    input_tuples = enumerate(input_iterable)
+
+    def _wrap(input_tuple, function, **kwargs):
+        return input_tuple[0], function(input_tuple[1], **kwargs)
+
     stage = pr.map(
         partial(
-            function,
+            _wrap,
+            function=function,
             **kwargs,
         ),
-        input_iterable,
+        input_tuples,
         workers=n_workers,
     )
     if progressbar:
-        return [x for x in tqdm(stage, total=len(input_iterable))]
-    else:
-        return [x for x in stage]
+        stage = tqdm(stage, total=len(input_iterable))
+    return [t[1] for t in sorted((x for x in stage), key=lambda t: t[0])]
