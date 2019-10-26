@@ -1,16 +1,3 @@
-from __future__ import print_function
-from __future__ import division
-from __future__ import unicode_literals
-from __future__ import absolute_import
-from builtins import int
-from builtins import input
-from builtins import range
-from builtins import object
-from future import standard_library
-
-standard_library.install_aliases()
-
-
 # Mike C Fletcher's flatten http://www.bit.ly/2ULLMnm
 def flatten(obj, ltypes=(list, tuple)):
     """Flatten a nested variable, by default only list/tuple combinations."""
@@ -75,11 +62,11 @@ def local_vars(print_vars=True, depth=0, fillers=25):
     Fill up to (fillers) characters with periods '.'
     """
     from inspect import currentframe, getouterframes
-    fct = get_current_function(depth+1)
-    locs = getouterframes(currentframe())[depth+1][0].f_locals
+    fct = get_current_function(depth + 1)
+    locs = getouterframes(currentframe())[depth + 1][0].f_locals
     variables = []
     for var in fct.__code__.co_varnames:
-        var_string = '{0:.<{2}}{1}'.format(var, locs[var], fillers if len(var) < fillers else len(var)+4)
+        var_string = '{0:.<{2}}{1}'.format(var, locs[var], fillers if len(var) < fillers else len(var) + 4)
         if print_vars:
             print(var_string)
         variables.append((var, locs[var]))
@@ -134,18 +121,19 @@ def integer_input(question=''):
 
 def myconverter(o):
     """Use json.dumps(data, default=myconverter)."""
+    import datetime
     if isinstance(o, datetime.datetime):
         return o.__str__()
 
 
 def parse_datetime(datetime_string, strf='%Y-%m-%d %H:%M:%S%z'):
+    import datetime
     if '.' in datetime_string:
         strf = '%Y-%m-%d %H:%M:%S.%f%z'
     return datetime.datetime.strptime(
         datetime_string.replace(':00', '00'),  # %z timezone in format +0000
         strf,
     )
-
 
 
 class cst(object):

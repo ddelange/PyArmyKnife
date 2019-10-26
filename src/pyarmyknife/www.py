@@ -1,10 +1,3 @@
-from __future__ import unicode_literals
-from __future__ import print_function
-from __future__ import division
-from __future__ import absolute_import
-from builtins import open
-from future import standard_library
-
 import os
 import json
 import smtplib
@@ -14,8 +7,6 @@ from urllib import parse as urlparse
 
 import aiobotocore
 from botocore.exceptions import ClientError
-
-standard_library.install_aliases()
 
 
 def send_email(
@@ -41,21 +32,29 @@ def send_email(
     return failures
 
 
-def extract_domain(url, with_subdomain=False):
+def extract_domain(url):
     """Extract domain from url, needs a proper domain/suffix.
 
-    with_subdomain=True
-        Return a Fully Qualified Domain Name with suffix.
-    with_subdomain=False
-        Return only the registered domain with suffix.
+    Args:
+        url (str): A URL or a domain
+
+    Returns:
+        str: Normalized domain that includes all subdomains except www.
+             Returns None if any sanity check fails.
     """
-    assert isinstance(url, str) and url, f'Input "{url}" is not accepted'
-    url = url.replace('\xa0', ' ').strip(' \n')
-    if with_subdomain:
-        fqdn = tldextract.extract(url).fqdn.lower()
-        return fqdn[4:] if fqdn.startswith('www.') else fqdn
-    else:
-        return tldextract.extract(url).registered_domain.lower()
+    if not isinstance(url, str):
+        return
+
+    if "://" in url and not url.lstrip().startswith("http"):
+        return
+
+    result = tldextract.extract(url)
+    fqdn = result.fqdn.lower().lstrip(".\\")
+
+    extracted = fqdn[4:] if result.subdomain and fqdn.startswith("www.") else fqdn
+
+    if extracted and len(extracted) <= 2000:
+        return extracted
 
 
 class S3io():

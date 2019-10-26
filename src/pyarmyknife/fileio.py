@@ -1,20 +1,5 @@
-from __future__ import print_function
-from __future__ import unicode_literals
-from __future__ import division
-from __future__ import absolute_import
-from builtins import open
-from builtins import str
-from future import standard_library
-
-import base64
 import inspect
 import os
-import zlib
-from ast import literal_eval
-from sys import platform
-
-standard_library.install_aliases()
-
 
 try:
     stack = inspect.stack()
@@ -51,9 +36,11 @@ def load(filename):
 
 
 def string_compress(data, compression_level=7):
-    """Compress a variable into a Py3 str that is json serializable."""
+    """Compress a variable into a Py3 str that has a __repr__  method."""
+    import base64
+    import zlib
     compressed = zlib.compress(
-        str(data).encode('utf-8'),
+        repr(data).encode('utf-8'),
         compression_level,
     )
     return base64.encodebytes(compressed).decode('ascii')
@@ -61,6 +48,9 @@ def string_compress(data, compression_level=7):
 
 def string_decompress(compressed):
     """Decompress and unpack a string from string_compress into a variable."""
+    import base64
+    import zlib
+    from ast import literal_eval
     decompressed = zlib.decompress(
         base64.decodebytes(compressed.encode('ascii')),
     )
@@ -83,29 +73,30 @@ def open_with_default(filepath):
     opens a file (full path) with default application, on different operating systems
     """
     from subprocess import call as subcall
-    from os import system
+    from os import system, name
+    from sys import platform
     if platform.startswith('darwin'):  # Mac
         if filepath.endswith('pdf'):
             # preferably open with Skim, because of its auto refresh (Terminal: defaults write -app Skim SKAutoReloadFileUpdate -boolean true)
             system('open -a Skim \"{}\"'.format(filepath))
         else:
             subcall(('open', filepath))
-    elif os.name is 'posix':  # Unix
+    elif name == 'posix':  # Unix
         # subcall(('xdg-open', filepath))
         system('xdg-open \"{}\" > /dev/null 2>&1 &'.format(filepath))
-    elif os.name is 'nt':  # Windows
+    elif name == 'nt':  # Windows
         system('start \"\" /b \"{}\"'.format(filepath))
 
 
 def write_fits(images, name):
     from astropy.io import fits
-    if not os.path.exists(curpath + 'img'):
-        os.makedirs(curpath + 'img')
+    if not os.path.exists(current_path + 'img'):
+        os.makedirs(current_path + 'img')
     nwhdulist = fits.HDUList()
     nwhdulist.append(fits.PrimaryHDU())  # header=fits.open(fitslocation+source_list[0])[0].header))
     for image in images:
         nwhdulist.append(fits.ImageHDU(data=image))
-    nwhdulist.writeto(os.path.join(curpath, 'img', name + '.fits', clobber=True))
+    nwhdulist.writeto(os.path.join(current_path, 'img', name + '.fits', clobber=True))
     nwhdulist.close()
 
 
@@ -115,6 +106,7 @@ def append_to_txt(plaintext, name='output.txt'):
 
 
 def write_dict_to_json(data_dict, filename='output', openfile=False):
+    import json
     if not filename.endswith('.json'):
         filename = os.path.join(current_path, filename + '.json')
     with open(filename, 'w') as output_file:
@@ -125,6 +117,7 @@ def write_dict_to_json(data_dict, filename='output', openfile=False):
 
 
 def load_json(filename):
+    import json
     if os.path.isfile(filename):
         with open(filename, 'r') as fp:
             return json.load(fp)
