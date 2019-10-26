@@ -1,5 +1,5 @@
-from pathlib import Path
 import re
+from pathlib import Path
 
 from setuptools import find_packages, setup
 
@@ -39,19 +39,15 @@ def read_requirements(path):
 
 
 setup(
-    name='pyarmyknife',
-    author='D. de Lange',
-    author_email='14880945+ddelange@users.noreply.github.com',
+    name="pyarmyknife",
+    author="D. de Lange",
+    author_email="14880945+ddelange@users.noreply.github.com",
     version=read_version(init_path),
     install_requires=read_requirements(requirements_path),
-    extras_require={
-        'sklearn': ['scikit-learn']
-    },
-    python_requires='>=3.3.0',
-    packages=find_packages(where='src'),
-    package_dir={'': 'src'},
-    package_data={
-        '': ['*.csv', '*.xml', '*.yaml'],
-    },
+    extras_require={"sklearn": ["scikit-learn"]},
+    python_requires=">=3.3.0",
+    packages=find_packages(where="src"),
+    package_dir={"": "src"},
+    package_data={"": ["*.csv", "*.xml", "*.yaml"]},
     include_package_data=True,
 )

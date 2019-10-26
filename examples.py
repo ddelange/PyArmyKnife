@@ -4,7 +4,9 @@ import pyarmyknife as pak
 def test_function(data, increase_by, sleep=False):
     """Do some massive stuff with one element from iterable."""
     if sleep:
-        from time import sleep; sleep(2)
+        from time import sleep
+
+        sleep(2)
     return data + increase_by
 
 
@@ -23,11 +25,8 @@ def various_examples():
     pak.misc.set_trace()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     a = pak.parallel.parallel_function(
-        test_function,
-        range(50),
-        increase_by=42,
-        sleep=True
+        test_function, range(50), increase_by=42, sleep=True
     )
     various_examples()
