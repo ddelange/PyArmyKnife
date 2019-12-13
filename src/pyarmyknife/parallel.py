@@ -2,7 +2,7 @@
 
 
 def parallel_function(
-    function, input_iterable, n_workers=-1, progressbar=True, **kwargs
+    function, input_iterable, *, n_workers=-1, progressbar=True, **kwargs
 ):
     """Apply function to each element of input_iterable and ensure output order."""
     from functools import partial

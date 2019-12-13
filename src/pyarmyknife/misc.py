@@ -6,8 +6,7 @@ logger = logging.getLogger(__name__)
 
 
 def flatten(obj, ltypes=(list, tuple)):
-    """
-    Flatten a nested variable, by default only list/tuple combinations.
+    """Flatten a nested variable, by default only list/tuple combinations.
 
     Source: Mike C Fletcher's flatten http://www.bit.ly/2ULLMnm
     """
@@ -15,7 +14,9 @@ def flatten(obj, ltypes=(list, tuple)):
     obj = list(obj)
     i = 0
     while i < len(obj):
-        while isinstance(obj[i], ltypes):
+        while isinstance(obj[i], ltypes) and not (
+            isinstance(obj[i], str) and len(obj[i]) == 1
+        ):
             if not obj[i]:
                 obj.pop(i)
                 i -= 1
@@ -26,7 +27,7 @@ def flatten(obj, ltypes=(list, tuple)):
     return ltype(obj)
 
 
-def split_batch(data, size=100):
+def split_batch(data, *, size=100):
     """Yield iterable generator object of splitted lists or dicts."""
     from itertools import islice
 
@@ -45,8 +46,7 @@ def split_batch(data, size=100):
 
 
 def get_current_function(depth=0):
-    """
-    Get the function object of the current function (depth=0).
+    """Get the function object of the current function (depth=0).
 
     Or the function above that (depth=1) et cetera
     """
@@ -64,9 +64,8 @@ def get_current_function(depth=0):
         return f"{e}: unknown function"
 
 
-def local_vars(print_vars=True, depth=0, fillers=25):
-    """
-    Print -in order of declaration- all local variables.
+def local_vars(*, print_vars=True, depth=0, fillers=25):
+    """Print -in order of declaration- all local variables.
 
     In the current function (depth=0) or the function above that (depth=1) et cetera
 
@@ -87,7 +86,7 @@ def local_vars(print_vars=True, depth=0, fillers=25):
     return variables
 
 
-def pp(indent=1, width=80, depth=None, stream=None, compact=False):
+def pp(*, indent=1, width=80, depth=None, stream=None, compact=False):
     import pprint
 
     return pprint.PrettyPrinter(
@@ -109,7 +108,7 @@ def line_up(iteration=1):
     stdout.write("\x1b[2K")
 
 
-def write_up(writeline="test3", iteration=1):
+def write_up(writeline, iteration=1):
     """Run liup, then fills that line, and put the cursor down to original position."""
     from sys import stdout
 
@@ -161,9 +160,7 @@ def parse_datetime(datetime_string, strf="%Y-%m-%d %H:%M:%S%z"):
 class cst(object):
     """SI constants."""
 
-    Pi = (
-        3.141592653589793238462643383279502884
-    )  # https://github.com/numpy/numpy/blob/464f79eb1d05bf938d16b49da1c39a4e02506fa3/numpy/core/include/numpy/npy_math.h#L79
+    Pi = 3.141592653589793238462643383279502884  # https://github.com/numpy/numpy/blob/464f79eb1d05bf938d16b49da1c39a4e02506fa3/numpy/core/include/numpy/npy_math.h#L79
     Grav = 6.67384e-11  # m^3 kg^-1 s^-2
     Planck = 6.626070040e-34  # m^2 kg s^-1         OR    J s
     Boltz = 1.38064852e-23  # m^2 kg s^-2 K^-1    OR    J K^-1

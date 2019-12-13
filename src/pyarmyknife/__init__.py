@@ -1,33 +1,7 @@
-import pkg_resources
-import pyarmyknife.fileio
-import pyarmyknife.misc
-import pyarmyknife.parallel
-import pyarmyknife.plt
-import pyarmyknife.www
-
-"""
-PEP0440 compatible formatted version, see:
-https://www.python.org/dev/peps/pep-0440/
-
-Generic release markers:
-  X.Y
-  X.Y.Z   # For bugfix releases
-
-Admissible pre-release markers:
-  X.YaN   # Alpha release
-  X.YbN   # Beta release
-  X.YrcN  # Release Candidate
-  X.Y     # Final release
-
-Dev branch marker is: 'X.Y.dev' or 'X.Y.devN' where N is an integer.
-'X.Y.dev0' is the canonical version of 'X.Y.dev'
-"""
-__version__ = "1.0.0"
-
-try:
-    pkg_version = pkg_resources.get_distribution("pyarmyknife").version
-except pkg_resources.DistributionNotFound:
-    raise RuntimeError("Install pyarmyknife, eg `pip install -e .`")
-
-if pkg_version != __version__:
-    raise RuntimeError(f"Reinstall pyarmyknife, eg `pip install -e .`")
+# version based on .git/refs/tags - make a tag/release locally, or on GitHub (and pull)
+import pyarmyknife.fileio  # noqa:F401
+import pyarmyknife.misc  # noqa:F401
+import pyarmyknife.parallel  # noqa:F401
+import pyarmyknife.plt  # noqa:F401
+import pyarmyknife.www  # noqa:F401
+from pyarmyknife._repo_version import version as __version__  # noqa:F401

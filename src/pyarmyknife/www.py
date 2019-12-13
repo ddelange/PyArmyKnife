@@ -64,8 +64,7 @@ def extract_domain(url):
 
 
 class S3io:
-    """
-    Interact with s3 using basic I/O functionality.
+    """Interact with s3 using basic I/O functionality.
 
     Before initializing the class, one needs to have (implicitly) called
 

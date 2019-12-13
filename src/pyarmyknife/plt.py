@@ -38,8 +38,7 @@ def hide_ticklines(ax=None, which="both", idx=(0, -1)):
 
 
 def plt_setup(packages=(), preamble=(), tex=True, bold=None):
-    """
-    Set up LaTex rendering with custom preamble.
+    """Set up LaTex rendering with custom preamble.
 
     Bold text/maths rendering
     Tick formatting, font sizes, gridlines
@@ -73,9 +72,7 @@ def plt_setup(packages=(), preamble=(), tex=True, bold=None):
     if bold is True:
         rcParams[
             "axes.labelweight"
-        ] = (
-            "bold"
-        )  # for math mode and siunitx detection only, use \bf{Flux\ (\si{})} for upright bold or without \bf for italic results
+        ] = "bold"  # for math mode and siunitx detection only, use \bf{Flux\ (\si{})} for upright bold or without \bf for italic results
         if "\\boldmath" not in rcParams["text.latex.preamble"]:
             rcParams["text.latex.preamble"].append(
                 "\\boldmath"

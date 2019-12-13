@@ -1,9 +1,9 @@
-from pyarmyknife.plt import _figuredpi, _figureformat, set_figuredpi, set_figureformat
+from pyarmyknife import plt
 
 
-def test_string_compress():
-    set_figureformat("jpg")
-    assert _figureformat == "jpg"
+def test_set():
+    plt.set_figureformat("jpg")
+    assert plt._figureformat == "jpg"
 
-    set_figuredpi(300)
-    assert _figuredpi == 300
+    plt.set_figuredpi(300)
+    assert plt._figuredpi == 300

@@ -90,6 +90,9 @@ ENV/
 env.bak/
 venv.bak/
 
+# Direnv (https://github.com/direnv/direnv)
+.envrc
+
 # Spyder project settings
 .spyderproject
 .spyproject
@@ -105,3 +108,9 @@ venv.bak/
 
 # MacOS
 .DS_Store
+
+# Emacs
+*~
+
+# setuptools_scm
+_repo_version.py

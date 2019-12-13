@@ -1,26 +1,31 @@
-name: CI
+name: GH
 
 on: [push]
 
+env:
+  # PIP_INDEX_URL: https://${{ secrets.PYPI_USER }}:${{ secrets.PYPI_PASSWORD }}@custom_pypi/simple
+  PIP_EXTRA_INDEX_URL: https://pypi.org/simple
+
 jobs:
-  build:
+  CI:
     runs-on: ubuntu-latest
-    strategy:
-      max-parallel: 4
-      matrix:
-        python-version: [3.7]
     steps:
     - uses: actions/checkout@v1
 
-    - name: Set up Python ${{ matrix.python-version }}
+    - name: Set up Python
       uses: actions/setup-python@v1
       with:
-        python-version: ${{ matrix.python-version }}
+        python-version: 3.7
+
+    - name: Pip cache
+      uses: actions/cache@v1
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements/*.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
 
     - name: Install dependencies
-      env:
-        # PIP_INDEX_URL: https://${{ secrets.PYPI_USER }}:${{ secrets.PYPI_PASSWORD }}@custom_pypi_url/simple
-        PIP_EXTRA_INDEX_URL: https://pypi.org/simple/
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements/ci.txt
@@ -38,16 +43,38 @@ jobs:
         CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
       run: codecov
 
-    # - name: PyPi Deploy preparation
-    #   if: startsWith(github.ref, 'refs/tags/')
-    #   run: |
-    #     pip install --upgrade setuptools wheel
-    #     python setup.py sdist bdist_wheel
+  # CD:
+  #   needs: CI
+  #   if: startsWith(github.ref, 'refs/tags/')
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #   - uses: actions/checkout@v1
 
-    # - name: PyPi Deploy
-    #   uses: pypa/gh-action-pypi-publish@v1.0.0a0
-    #   if: startsWith(github.ref, 'refs/tags/')
-    #   with:
-    #     user: ${{ secrets.PYPI_USER }}
-    #     password: ${{ secrets.PYPI_PASSWORD }}
-    #     # repository_url: custom_pypi_url
+  #   - name: Set up Python
+  #     uses: actions/setup-python@v1
+  #     with:
+  #       python-version: 3.7
+
+  #   - name: PyPi Deploy preparation
+  #     run: |
+  #       pip install --upgrade setuptools wheel
+  #       python setup.py sdist bdist_wheel
+
+  #   - name: PyPi Deploy
+  #     uses: pypa/gh-action-pypi-publish@v1.0.0a0
+  #     with:
+  #       user: ${{ secrets.PYPI_USER }}
+  #       password: ${{ secrets.PYPI_PASSWORD }}
+  #       repository_url: https://custom_pypi
+
+  #   - name: Docker image build and deploy
+  #     # GITHUB_TOKEN should be less than 60mins old at this point
+  #     run: |
+  #       DOCKER_IMAGE_PATH="./Dockerfile"
+  #       DOCKER_IMAGE_TAG="${GITHUB_REF##refs/tags/}"
+  #       DOCKER_IMAGE_NAME="docker.pkg.github.com/$GITHUB_REPOSITORY/$(basename $GITHUB_REPOSITORY):$DOCKER_IMAGE_TAG"
+  #       test -f $DOCKER_IMAGE_PATH || { echo "Dockerfile '$DOCKER_IMAGE_PATH' not found" && exit 1; }
+  #       echo ${{ secrets.GITHUB_TOKEN }} | docker login docker.pkg.github.com -u $GITHUB_ACTOR --password-stdin
+  #       docker build . -f $DOCKER_IMAGE_PATH -t $DOCKER_IMAGE_NAME --build-arg PIP_INDEX_URL=$PIP_INDEX_URL --build-arg PIP_EXTRA_INDEX_URL=$PIP_EXTRA_INDEX_URL
+  #       docker images
+  #       docker push $DOCKER_IMAGE_NAME

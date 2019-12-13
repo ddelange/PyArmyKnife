@@ -19,7 +19,7 @@ except Exception as e:
     )
 
 
-def dump(value, filename, compress=9, protocol=2):
+def dump(value, filename, *, compress=9, protocol=2):
     """Dump a Python object to disk."""
     try:
         try:  # sometimes the latter won't work where the externals does despite same __version__
@@ -42,23 +42,32 @@ def load(filename):
     return jobload(filename)
 
 
-def string_compress(data, compression_level=7):
-    """Compress a variable into a Py3 str that has a __repr__  method."""
+def string_compress(data, compression_level=4, **kwargs):
+    """Serialize and compress a variable into a Py3 str."""
     import base64
-    import zlib
+    import msgpack
+    import brotli
 
-    compressed = zlib.compress(repr(data).encode("utf-8"), compression_level)
-    return base64.encodebytes(compressed).decode("ascii")
+    compressed = brotli.compress(
+        msgpack.packb(
+            data,
+            use_bin_type=kwargs.pop("use_bin_type", True),
+            strict_types=kwargs.pop("strict_types", True),
+            **kwargs,
+        ),
+        quality=compression_level,
+    )
+    return base64.b64encode(compressed).decode("ascii")
 
 
-def string_decompress(compressed):
-    """Decompress and unpack a string from string_compress into a variable."""
+def string_decompress(compressed, **kwargs):
+    """Decompress and unpack a Py3 string from string_compress into a variable."""
     import base64
-    import zlib
-    from ast import literal_eval
+    import msgpack
+    import brotli
 
-    decompressed = zlib.decompress(base64.decodebytes(compressed.encode("ascii")))
-    return literal_eval(decompressed.decode("utf-8"))
+    decompressed = brotli.decompress(base64.b64decode(compressed.encode("ascii")))
+    return msgpack.unpackb(decompressed, raw=kwargs.pop("raw", False), **kwargs)
 
 
 def list_files(directory, hidden=False):
