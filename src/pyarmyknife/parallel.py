@@ -1,7 +1,4 @@
-"""pyarmyknife.parallel module."""
-
-
-def parallel_function(
+def parallel_function(  # noqa:E302
     function, input_iterable, *, n_workers=-1, progressbar=True, **kwargs
 ):
     """Apply function to each element of input_iterable and ensure output order."""

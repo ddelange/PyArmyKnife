@@ -1,8 +1,7 @@
-"""pyarmyknife.fileio module."""
-
 import inspect
 import logging
 import os
+from pickle import HIGHEST_PROTOCOL
 
 logger = logging.getLogger(__name__)
 
@@ -10,17 +9,18 @@ try:
     stack = inspect.stack()
     # print([entry for entry in stack])
     # current_file = [entry[1] for entry in stack if entry[-2][0].strip(' ').startswith('import %s' % inspect.getmodule(stack[1][0]).__name__)][0]
-    current_file = stack[-1][1]
+    current_file = os.path.abspath(stack[-1][1])
     current_path = os.path.dirname(current_file) + os.sep
 except Exception as e:
-    current_file, current_path = None, os.getcwdu()
+    current_file, current_path = None, os.getcwd()
     logger.info(
         f"{e}: Can't get current filename, probably running as main or using interactive mode. Skipping current_file and current_path."
     )
 
 
-def dump(value, filename, *, compress=9, protocol=2):
+def dump(value, filename, *, compress=("zlib", 7), protocol=HIGHEST_PROTOCOL):
     """Dump a Python object to disk."""
+    filename = os.path.abspath(filename)
     try:
         try:  # sometimes the latter won't work where the externals does despite same __version__
             from sklearn.externals.joblib import dump as jobdump
@@ -35,6 +35,7 @@ def dump(value, filename, *, compress=9, protocol=2):
 
 def load(filename):
     """Load a Python object from disk."""
+    filename = os.path.abspath(filename)
     try:
         from sklearn.externals.joblib import load as jobload
     except Exception:
@@ -81,23 +82,24 @@ def list_files(directory, hidden=False):
     return files
 
 
-def open_with_default(filepath):
+def open_with_default(filename):
     """Open a file with default application depending on operating system."""
     from subprocess import call as subcall
     from os import system, name
     from sys import platform
 
+    filename = os.path.abspath(filename)
     if platform.startswith("darwin"):  # Mac
-        if filepath.endswith("pdf"):
+        if filename.endswith("pdf"):
             # preferably open with Skim, because of its auto refresh (Terminal: defaults write -app Skim SKAutoReloadFileUpdate -boolean true)
-            system('open -a Skim "{}"'.format(filepath))
+            system('open -a Skim "{}"'.format(filename))
         else:
-            subcall(("open", filepath))
+            subcall(("open", filename))
     elif name == "posix":  # Unix
-        # subcall(('xdg-open', filepath))
-        system('xdg-open "{}" > /dev/null 2>&1 &'.format(filepath))
+        # subcall(('xdg-open', filename))
+        system('xdg-open "{}" > /dev/null 2>&1 &'.format(filename))
     elif name == "nt":  # Windows
-        system('start "" /b "{}"'.format(filepath))
+        system('start "" /b "{}"'.format(filename))
 
 
 def write_fits(images, name):

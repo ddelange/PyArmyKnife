@@ -29,7 +29,7 @@ setup(
         "relative_to": __file__,
     },
     extras_require={"sklearn": ["scikit-learn"]},
-    python_requires=">=3.3.0",
+    python_requires=">=3.5.0",
     include_package_data=True,
     package_data={},
     packages=find_packages(where="src"),

@@ -1,6 +1,3 @@
-"""pyarmyknife.plt module."""
-
-
 import logging
 
 logger = logging.getLogger(__name__)
@@ -149,7 +146,7 @@ def save_figure(
     printformat=None,
     dpi=None,
     open_fig=False,
-    setup=True,
+    setup=False,
     clear=True,
     fig=None,
     bbox_inches="tight",

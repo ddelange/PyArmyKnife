@@ -1,5 +1,3 @@
-"""pyarmyknife.www module."""
-
 import json
 import logging
 import os
