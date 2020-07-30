@@ -1,5 +1,6 @@
 aiobotocore[awscli,boto3]
 brotli
 msgpack>=0.5.2
-pypeln
+pathos
 tldextract
+tqdm

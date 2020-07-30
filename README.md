@@ -15,33 +15,21 @@ pip install git+https://github.com/ddelange/PyArmyKnife.git@master
 
 ## Usage
 ```python
+import numpy as np
+import pandas as pd
 import pyarmyknife as pak
 
+# parralel_apply method
+pak.parallel.patch_pandas()
+help(pd.DataFrame.parallel_apply)
 
-def foo(x, power):
-    return x ** power
+df = pd.DataFrame(np.random.randint(0, 300, size=(int(100000), 3)), columns=list("ABC"))
 
+df["totals"] = df.parallel_apply(sum, axis=1, progressbar=False)
 
-multicore_list = pak.parallel.parallel_function(foo, range(100000), power=1.1)
-print(multicore_list[-10:])
+df.parallel_apply(sum)
 
-
-def test():
-    # for use in python files
-    current_file = pak.fileio.current_file
-    current_path = pak.fileio.current_path
-
-    current_function = pak.misc.get_current_function()
-
-    pp = pak.misc.pp()
-
-    pp([current_file, current_path, current_function])
-
-    pak.misc.local_vars(print_vars=True)
-
-    pak.misc.set_trace()
-
-
-if __name__ == '__main__':
-    test()
+# All sorts of other fun stuff
+pp = pak.misc.pp()  # pretty printer: pp(list(range(100)))
+t = pak.misc.set_trace  # ipdb: t()
 ```

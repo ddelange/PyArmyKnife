@@ -61,6 +61,27 @@ def extract_domain(url):
         return extracted
 
 
+def merge_url_query(url, _doseq=True, **kwargs):
+    """Add (new) query params to url, overwriting existing query parameters.
+
+    Note: Python 3.5+ only
+
+    Args:
+        url (str): A URL, e.g. 'http://stackoverflow.com/search?q=question'
+        _doseq (bool): Wether to urlencode using doseq
+        kwargs (dict): Query parameters to add to url, e.g. {'q': ['a', 'b']}
+
+    Returns:
+        str: Modified URL, e.g. 'http://stackoverflow.com/search?q=a&q=b'
+    """
+    from urllib.parse import urlparse, urlencode, parse_qs, unquote
+
+    parsed = urlparse(unquote(url))
+    return parsed._replace(
+        query=urlencode({**parse_qs(parsed.query), **kwargs}, doseq=_doseq)
+    ).geturl()
+
+
 class S3io:
     """Interact with s3 using basic I/O functionality.
 
