@@ -1,5 +1,7 @@
 from functools import partial
+
 import psutil
+from tqdm.auto import tqdm
 
 
 def max_cores():
@@ -30,11 +32,9 @@ def parallel_function(  # noqa:E302
 
     stage = pool.imap(partial(function, *args, **kwargs), input_iterable)
     if progressbar:
-        from tqdm import tqdm
-
         stage = tqdm(stage, total=total)
 
-    return [x for x in stage]
+    return list(stage)
 
 
 def parallel_apply(

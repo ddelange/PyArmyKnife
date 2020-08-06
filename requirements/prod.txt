@@ -1,6 +1,12 @@
-aiobotocore[awscli,boto3]
+# fileio
 brotli
 msgpack>=0.5.2
+
+# parallel
 pathos
+psutil
+tqdm>=4.27  # from tqdm.auto import tqdm
+
+# www
+aiobotocore[awscli,boto3]
 tldextract
-tqdm

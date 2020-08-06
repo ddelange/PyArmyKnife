@@ -40,8 +40,6 @@ def plt_setup(packages=(), preamble=(), tex=True, bold=None):
     Bold text/maths rendering
     Tick formatting, font sizes, gridlines
     """
-    from matplotlib import rcParams
-
     if not packages:
         packages = []
     elif isinstance(packages, str):
@@ -66,56 +64,58 @@ def plt_setup(packages=(), preamble=(), tex=True, bold=None):
 
     rc("font", family="serif")
     rc("text", usetex=tex)
-    if bold is True:
-        rcParams[
-            "axes.labelweight"
-        ] = "bold"  # for math mode and siunitx detection only, use \bf{Flux\ (\si{})} for upright bold or without \bf for italic results
-        if "\\boldmath" not in rcParams["text.latex.preamble"]:
-            rcParams["text.latex.preamble"].append(
-                "\\boldmath"
-            )  # \boldmath declaration switches to a bold math italic font; this causes letters, numbers, and most symbols used in math mode to be set in a bold type.
-    elif bold is False:
-        rcParams["axes.labelweight"] = "normal"
-        if "\\boldmath" in rcParams["text.latex.preamble"]:
-            rcParams["text.latex.preamble"].remove("\\boldmath")
 
-    if len(packages) > 0:
-        packages = [
-            s for s in list(set(packages)) if not str(s).strip("-").isdigit()
-        ]  # filter out integers and duplicates
-        rcParams["text.latex.preamble"].extend(
-            [
-                "\\usepackage{%s}" % (i,)
-                if "\\usepackage{%s}" % (i,) not in rcParams["text.latex.preamble"]
-                else ""
-                for i in packages
-            ]
-        )
-    if len(preamble) > 0:
-        preamble = [
-            s for s in list(set(preamble)) if not str(s).strip("-").isdigit()
-        ]  # filter out integers and duplicates
-        rcParams["text.latex.preamble"].extend(
-            [i if i not in rcParams["text.latex.preamble"] else "" for i in preamble]
-        )
-    from matplotlib.pyplot import tick_params, grid, gca
+    # from matplotlib import rcParams
+    # if bold is True:
+    #     rcParams[
+    #         "axes.labelweight"
+    #     ] = "bold"  # for math mode and siunitx detection only, use \bf{Flux\ (\si{})} for upright bold or without \bf for italic results
+    #     if "\\boldmath" not in rcParams["text.latex.preamble"]:
+    #         rcParams["text.latex.preamble"].append(
+    #             "\\boldmath"
+    #         )  # \boldmath declaration switches to a bold math italic font; this causes letters, numbers, and most symbols used in math mode to be set in a bold type.
+    # elif bold is False:
+    #     rcParams["axes.labelweight"] = "normal"
+    #     if "\\boldmath" in rcParams["text.latex.preamble"]:
+    #         rcParams["text.latex.preamble"].remove("\\boldmath")
 
-    gca().ticklabel_format(style="sci", scilimits=(-3, 5), axis="both")
-    gca().xaxis.label.set_size(17)
-    gca().yaxis.label.set_size(17)
-    gca().tick_params(
-        axis="both",
-        which="both",
-        color="black",
-        direction="out",
-        length=2.5,
-        width=0.5,
-        zorder=1,
-    )
-    hide_ticklines()
-    rc("legend", **{"fontsize": 14})
-    tick_params(labelsize=16)
-    grid(b="on", which="major", axis="both")
+    # if len(packages) > 0:
+    #     packages = [
+    #         s for s in list(set(packages)) if not str(s).strip("-").isdigit()
+    #     ]  # filter out integers and duplicates
+    #     rcParams["text.latex.preamble"].extend(
+    #         [
+    #             "\\usepackage{%s}" % (i,)
+    #             if "\\usepackage{%s}" % (i,) not in rcParams["text.latex.preamble"]
+    #             else ""
+    #             for i in packages
+    #         ]
+    #     )
+    # if len(preamble) > 0:
+    #     preamble = [
+    #         s for s in list(set(preamble)) if not str(s).strip("-").isdigit()
+    #     ]  # filter out integers and duplicates
+    #     rcParams["text.latex.preamble"].extend(
+    #         [i if i not in rcParams["text.latex.preamble"] else "" for i in preamble]
+    #     )
+    # from matplotlib.pyplot import tick_params, grid, gca
+
+    # gca().ticklabel_format(style="sci", scilimits=(-3, 5), axis="both")
+    # gca().xaxis.label.set_size(17)
+    # gca().yaxis.label.set_size(17)
+    # gca().tick_params(
+    #     axis="both",
+    #     which="both",
+    #     color="black",
+    #     direction="out",
+    #     length=2.5,
+    #     width=0.5,
+    #     zorder=1,
+    # )
+    # hide_ticklines()
+    # rc("legend", **{"fontsize": 14})
+    # tick_params(labelsize=16)
+    # grid(b="on", which="major", axis="both")
 
 
 def cbar_setup(img=None, fig=None, ax=None, label="", tick_length=2.5, tick_width=0.5):
